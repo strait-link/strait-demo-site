@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Acme — a Strait demo client</title>
+<style>
+  :root{--bg:#0c0e12;--card:#161a22;--card2:#1c212c;--line:#2a313e;--ink:#eef1f7;
+    --mut:#9aa6bd;--accent:#5b8cff;--green:#41b883;--amber:#e8b54b;--red:#e5685e}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    line-height:1.5;padding:0 14px calc(40px + env(safe-area-inset-bottom));font-size:15px}
+  .wrap{max-width:560px;margin:0 auto}
+  header{text-align:center;padding:26px 4px 8px}
+  h1{font-size:24px}.tag{color:var(--mut);font-size:13px;margin-top:4px}
+  .badge{display:inline-block;margin-top:10px;font-size:11px;font-weight:700;color:var(--accent);
+    border:1px solid rgba(91,140,255,.4);border-radius:999px;padding:3px 12px}
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin:24px 0 10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+  label{display:block;font-size:12px;color:var(--mut);margin:8px 0 4px}
+  input{width:100%;padding:10px 12px;font-size:14px;background:var(--card2);border:1px solid var(--line);
+    border-radius:10px;color:var(--ink)}
+  input:focus{outline:none;border-color:var(--accent)}
+  button{width:100%;margin-top:12px;padding:12px;font-size:15px;font-weight:600;border:0;border-radius:10px;
+    background:var(--accent);color:#fff;cursor:pointer}
+  button.sec{background:var(--card2);color:var(--ink);border:1px solid var(--line)}
+  button:disabled{opacity:.5}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .res{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#0a0c10;border:1px solid var(--line);
+    border-radius:10px;padding:12px;margin-top:12px;white-space:pre-wrap;word-break:break-word;color:#cdd6e6;min-height:42px}
+  .ok{color:var(--green)}.err{color:var(--red)}.muted{color:var(--mut)}
+  .log{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--mut);margin-top:6px}
+  .log .line{padding:5px 0;border-bottom:1px solid var(--line)}
+  .hint{font-size:12.5px;color:var(--mut);margin-top:8px;line-height:1.5}
+  code{background:var(--card2);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:12px;color:#a5c8ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🛍️ Acme App</h1>
+    <div class="tag">a pretend customer product, powered by Strait</div>
+    <div class="badge">Strait demo client</div>
+  </header>
+
+  <h2>① Connect to your Strait workspace</h2>
+  <div class="card">
+    <label>Strait endpoint</label>
+    <input id="endpoint" value="https://bridge-redirect-engine.onrender.com">
+    <label>Your App ID <span class="muted">(Dashboard → Get started → App ID)</span></label>
+    <input id="appId" placeholder="paste your workspace App ID here">
+    <p class="hint">These are saved in this browser. The App ID ties every action below to <b>your</b> dashboard analytics.</p>
+  </div>
+
+  <h2>② Deferred link resolve <span class="muted">(what the SDK does on first launch)</span></h2>
+  <div class="card">
+    <p class="hint">Simulates your app asking Strait “did this device just click one of our links?” It sends coarse device fields; Strait adds the IP it sees and looks for a match.</p>
+    <button id="btnMatch">Check for a deferred link</button>
+    <div class="res" id="matchRes">—</div>
+  </div>
+
+  <h2>③ Conversion events <span class="muted">(your funnel + revenue)</span></h2>
+  <div class="card">
+    <p class="hint">Fire the events your real app would send. They show up in Dashboard → Analytics (funnel + revenue) and trigger webhooks.</p>
+    <div class="row">
+      <button class="sec" id="btnSignup">Track “signup”</button>
+      <button id="btnPurchase">Track “purchase” $49.99</button>
+    </div>
+    <div class="res" id="eventRes">—</div>
+  </div>
+
+  <h2>Activity</h2>
+  <div class="card"><div class="log" id="log"><span class="muted">requests will appear here…</span></div></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const cfg = () => ({ endpoint: $('endpoint').value.replace(/\/+$/,''), appId: $('appId').value.trim() });
+
+// persist config
+for (const k of ['endpoint','appId']) {
+  const v = localStorage.getItem('strait_'+k); if (v) $(k).value = v;
+  $(k).addEventListener('input', () => localStorage.setItem('strait_'+k, $(k).value));
+}
+
+function logLine(msg, ok) {
+  const el = $('log');
+  if (el.querySelector('.muted')) el.innerHTML = '';
+  const d = document.createElement('div');
+  d.className = 'line';
+  d.innerHTML = '<span class="'+(ok?'ok':'err')+'">'+(ok?'✓':'✗')+'</span> '+new Date().toLocaleTimeString()+' — '+msg;
+  el.prepend(d);
+}
+
+function device() {
+  return {
+    screenWidth: Math.round(window.screen.width),
+    pixelRatio: window.devicePixelRatio || 1,
+    language: navigator.language || 'en',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'XX',
+    platform: 'web',
+  };
+}
+
+async function post(path, body) {
+  const { endpoint } = cfg();
+  const res = await fetch(endpoint + path, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  });
+  let parsed = null; try { parsed = await res.json(); } catch {}
+  return { status: res.status, ok: res.ok, body: parsed };
+}
+
+$('btnMatch').onclick = async () => {
+  const { appId } = cfg();
+  if (!appId) { $('matchRes').innerHTML = '<span class="err">Enter your App ID first.</span>'; return; }
+  $('btnMatch').disabled = true; $('matchRes').textContent = '…';
+  try {
+    const r = await post('/v1/match', { appId, ...device() });
+    $('matchRes').textContent = JSON.stringify(r.body, null, 2);
+    logLine('POST /v1/match → '+r.status+(r.body?.matched?' (MATCHED → '+r.body.longUrl+')':' (no match yet)'), r.ok);
+  } catch (e) {
+    $('matchRes').innerHTML = '<span class="err">'+e.message+' — is CORS deployed & App ID correct?</span>';
+    logLine('POST /v1/match failed: '+e.message, false);
+  }
+  $('btnMatch').disabled = false;
+};
+
+async function sendEvent(name, extra) {
+  const { appId } = cfg();
+  if (!appId) { $('eventRes').innerHTML = '<span class="err">Enter your App ID first.</span>'; return; }
+  $('eventRes').textContent = '…';
+  try {
+    const r = await post('/v1/event', { appId, event: name, ...extra });
+    $('eventRes').innerHTML = r.ok
+      ? '<span class="ok">✓ '+name+' tracked ('+r.status+'). Check Dashboard → Analytics.</span>'
+      : '<span class="err">'+r.status+': '+JSON.stringify(r.body)+'</span>';
+    logLine('POST /v1/event "'+name+'" → '+r.status, r.ok);
+  } catch (e) {
+    $('eventRes').innerHTML = '<span class="err">'+e.message+'</span>';
+    logLine('POST /v1/event failed: '+e.message, false);
+  }
+}
+$('btnSignup').onclick = () => sendEvent('signup', {});
+$('btnPurchase').onclick = () => sendEvent('purchase', { value: 49.99, currency: 'USD' });
+</script>
+</body>
+</html>
