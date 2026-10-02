@@ -1,0 +1,31 @@
+# Keeps Strait's free-tier infrastructure from going to sleep:
+# - Render's free web service sleeps after ~15 min idle (first visitor then
+#   waits 30-60 s on a "waking up" page), and
+# - Supabase's free project pauses after ~7 days without database activity.
+# /healthz/deep wakes the engine AND runs a database query. If the database is
+# down the job fails, and GitHub emails the repo owner: a free outage alert.
+# Lives in this public repo because Actions minutes are free for public repos.
+# Note: GitHub disables schedules in repos with no commits for 60 days; then
+# re-enable it under Actions, or move to a paid Render plan / an uptime monitor.
+name: keep-strait-awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Deep health check (engine + database)
+        run: |
+          for attempt in 1 2 3 4; do
+            code=$(curl -s -o body.json -w '%{http_code}' -m 90 https://bridge-redirect-engine.onrender.com/healthz/deep || true)
+            echo "attempt $attempt: HTTP $code $(cat body.json 2>/dev/null)"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "::error::Strait engine or database is down (last HTTP $code)"
+          exit 1
