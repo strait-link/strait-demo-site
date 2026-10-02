@@ -47,9 +47,9 @@
   <div class="card">
     <label>Strait endpoint</label>
     <input id="endpoint" value="https://bridge-redirect-engine.onrender.com">
-    <label>Your App ID <span class="muted">(Dashboard → Get started → App ID)</span></label>
-    <input id="appId" placeholder="paste your workspace App ID here">
-    <p class="hint">These are saved in this browser. The App ID ties every action below to <b>your</b> dashboard analytics.</p>
+    <label>Publishable key <span class="muted">(Dashboard → Get started → Publishable key)</span></label>
+    <input id="publishableKey" placeholder="bk_pub_live_…">
+    <p class="hint">These are saved in this browser. The publishable key ties every action below to <b>your</b> workspace's analytics. It's safe to use in a website.</p>
   </div>
 
   <h2>② Deferred link resolve <span class="muted">(what the SDK does on first launch)</span></h2>
@@ -75,10 +75,14 @@
 
 <script>
 const $ = (id) => document.getElementById(id);
-const cfg = () => ({ endpoint: $('endpoint').value.replace(/\/+$/,''), appId: $('appId').value.trim() });
+const cfg = () => ({ endpoint: $('endpoint').value.replace(/\/+$/,''), publishableKey: $('publishableKey').value.trim() });
 
-// persist config
-for (const k of ['endpoint','appId']) {
+// Served from this machine → default to the local engine (npm run dev, port 3000)
+// rather than the hosted one, so local testing never silently hits old code.
+if (['localhost', '127.0.0.1'].includes(location.hostname)) $('endpoint').value = 'http://localhost:3000';
+
+// persist config (an endpoint/key you typed wins over the default above)
+for (const k of ['endpoint','publishableKey']) {
   const v = localStorage.getItem('strait_'+k); if (v) $(k).value = v;
   $(k).addEventListener('input', () => localStorage.setItem('strait_'+k, $(k).value));
 }
@@ -112,26 +116,26 @@ async function post(path, body) {
 }
 
 $('btnMatch').onclick = async () => {
-  const { appId } = cfg();
-  if (!appId) { $('matchRes').innerHTML = '<span class="err">Enter your App ID first.</span>'; return; }
+  const { publishableKey } = cfg();
+  if (!publishableKey) { $('matchRes').innerHTML = '<span class="err">Enter your publishable key first.</span>'; return; }
   $('btnMatch').disabled = true; $('matchRes').textContent = '…';
   try {
-    const r = await post('/v1/match', { appId, ...device() });
+    const r = await post('/v1/match', { publishableKey, ...device() });
     $('matchRes').textContent = JSON.stringify(r.body, null, 2);
     logLine('POST /v1/match → '+r.status+(r.body?.matched?' (MATCHED → '+r.body.longUrl+')':' (no match yet)'), r.ok);
   } catch (e) {
-    $('matchRes').innerHTML = '<span class="err">'+e.message+' — is CORS deployed & App ID correct?</span>';
+    $('matchRes').innerHTML = '<span class="err">'+e.message+' — is the endpoint reachable & the publishable key correct?</span>';
     logLine('POST /v1/match failed: '+e.message, false);
   }
   $('btnMatch').disabled = false;
 };
 
 async function sendEvent(name, extra) {
-  const { appId } = cfg();
-  if (!appId) { $('eventRes').innerHTML = '<span class="err">Enter your App ID first.</span>'; return; }
+  const { publishableKey } = cfg();
+  if (!publishableKey) { $('eventRes').innerHTML = '<span class="err">Enter your publishable key first.</span>'; return; }
   $('eventRes').textContent = '…';
   try {
-    const r = await post('/v1/event', { appId, event: name, ...extra });
+    const r = await post('/v1/event', { publishableKey, event: name, ...extra });
     $('eventRes').innerHTML = r.ok
       ? '<span class="ok">✓ '+name+' tracked ('+r.status+'). Check Dashboard → Analytics.</span>'
       : '<span class="err">'+r.status+': '+JSON.stringify(r.body)+'</span>';
