@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fingerprint check · browser side</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; margin: 0; min-height: 100vh; display: flex;
+         align-items: center; justify-content: center; background: #f3f5f4; color: #15211d; }
+  main { max-width: 26rem; padding: 2rem; text-align: center; }
+  code { display: block; font-size: 28px; font-weight: 700; margin: 12px 0; color: #0b6b57; }
+  p { color: #4d5d57; line-height: 1.5; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Fingerprint check</h1>
+  <p id="msg">Reading this browser…</p>
+  <code id="code"></code>
+  <p id="next" hidden>Done. Go back to the Strait Link app: it compares its own fingerprint with this one.</p>
+</main>
+<script>
+// Hosted here (not on the link domain) so Android doesn't hand the page to the
+// app that claims the link domain. Calls the engine cross-origin (CORS *).
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const key = q.get('k') || '';
+  const engine = (q.get('e') || 'https://bridge-redirect-engine.onrender.com').replace(/\/+$/, '');
+  const msg = document.getElementById('msg');
+  if (!/^bk_pub_(live|test)_[A-Za-z0-9]{6,64}$/.test(key)) { msg.textContent = 'Open this page from the Strait Link app (it adds your key).'; return; }
+  if (!/^https:\/\//.test(engine)) { msg.textContent = 'Invalid engine address.'; return; }
+  try {
+    const r = await fetch(engine + '/v1/debug/fingerprint', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        publishableKey: key, origin: 'web',
+        screenWidth: Math.round(screen.width), pixelRatio: window.devicePixelRatio || 1,
+        language: navigator.language || 'en',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'XX',
+      }),
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.status);
+    msg.textContent = "This browser's fingerprint:";
+    document.getElementById('code').textContent = j.extHash;
+    document.getElementById('next').hidden = false;
+  } catch (e) { msg.textContent = 'Could not read the fingerprint: ' + e.message; }
+})();
+</script>
+</body>
+</html>
