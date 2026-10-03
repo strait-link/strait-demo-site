@@ -41,7 +41,7 @@
 (async () => {
   const q = new URLSearchParams(location.search);
   const key = q.get('k') || '';
-  const engine = (q.get('e') || 'https://bridge-redirect-engine.onrender.com').replace(/\/+$/, '');
+  const engine = (q.get('e') || 'https://strait.link').replace(/\/+$/, '');
   const msg = document.getElementById('msg');
   if (!/^st_pub_(live|test)_[A-Za-z0-9]{6,64}$/.test(key)) { msg.textContent = 'Open this page from the Strait Link app (it adds your key).'; return; }
   if (!/^https:\/\//.test(engine)) { msg.textContent = 'Invalid engine address.'; return; }

@@ -22,7 +22,7 @@ jobs:
       - name: Deep health check (engine + database)
         run: |
           for attempt in 1 2 3 4; do
-            code=$(curl -s -o body.json -w '%{http_code}' -m 90 https://bridge-redirect-engine.onrender.com/healthz/deep || true)
+            code=$(curl -s -o body.json -w '%{http_code}' -m 90 https://strait.link/healthz/deep || true)
             echo "attempt $attempt: HTTP $code $(cat body.json 2>/dev/null)"
             [ "$code" = "200" ] && exit 0
             sleep 20
