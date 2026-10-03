@@ -5,21 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Tap a link in the browser</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="strait-tokens.css">
+<link rel="stylesheet" href="strait-ui.css">
 <style>
-  body { font-family: -apple-system, system-ui, sans-serif; margin: 0; min-height: 100vh; display: flex;
-         align-items: center; justify-content: center; background: #f3f5f4; color: #15211d; }
-  main { max-width: 26rem; padding: 2rem; text-align: center; }
-  a.btn { display: inline-block; margin: 16px 0; padding: 16px 28px; border-radius: 12px; background: #0b6b57;
-          color: #fff; font-weight: 700; font-size: 18px; text-decoration: none; }
-  code { font-size: 13px; word-break: break-all; color: #4d5d57; }
-  p { color: #4d5d57; line-height: 1.5; }
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+         background: var(--st-bg-subtle); padding: var(--st-space-4); box-sizing: border-box; }
+  main { width: 100%; max-width: 26rem; text-align: center; display: flex; flex-direction: column;
+         align-items: center; gap: var(--st-space-4); padding: var(--st-space-8) var(--st-space-6); }
+  .logo img { display: block; height: 32px; width: auto; }
+  main p { margin: 0; color: var(--st-text-muted); font: var(--st-text-body-lg); }
+  #go { min-width: 220px; height: 56px; font-size: 18px; font-weight: 600; border-radius: var(--st-radius-lg); }
+  #url { font: var(--st-text-code); word-break: break-all; color: var(--st-text-muted); background: none; padding: 0; }
 </style>
 </head>
-<body>
-<main>
-  <h1>Tap the link</h1>
+<body class="st-root">
+<main class="st-card">
+  <picture class="logo">
+    <source srcset="assets/strait-lockup-dark.svg" media="(prefers-color-scheme: dark)">
+    <img src="assets/strait-lockup.svg" alt="Strait" width="97" height="32">
+  </picture>
+  <h1 class="st-h1">Tap the link</h1>
   <p>This is a normal web page in your browser, like a site or an email that contains a Strait link.</p>
-  <a class="btn" id="go" href="#">Open the link</a>
+  <a class="btn st-btn st-btn--primary st-btn--lg" id="go" href="#">Open the link</a>
   <p><code id="url"></code></p>
 </main>
 <script>

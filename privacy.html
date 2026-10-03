@@ -4,22 +4,32 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Strait Link · Privacy Policy</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="strait-tokens.css">
+<link rel="stylesheet" href="strait-ui.css">
 <style>
-  body { font-family: -apple-system, system-ui, "Segoe UI", sans-serif; margin: 0; background: #f6f8f7; color: #15211d; }
-  main { max-width: 46rem; margin: 0 auto; padding: 32px 20px 64px; line-height: 1.6; }
-  h1 { font-size: 30px; margin: 0 0 4px; }
-  h2 { font-size: 19px; margin: 28px 0 8px; }
-  p, li { font-size: 15.5px; }
-  .muted { color: #5a6b65; }
-  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
-  th, td { text-align: left; border-bottom: 1px solid #dde3e0; padding: 8px 6px; vertical-align: top; }
-  th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: #5a6b65; }
-  .wrap { overflow-x: auto; }
+  body { margin: 0; background: var(--st-bg); }
+  main { max-width: 46rem; margin: 0 auto; padding: var(--st-space-8) var(--st-space-5) var(--st-space-16); font: var(--st-text-body-lg); }
+  .logo img { display: block; height: 28px; width: auto; margin-bottom: var(--st-space-8); }
+  h1 { margin: 0 0 var(--st-space-2); }
+  h2 { margin: var(--st-space-8) 0 var(--st-space-2); }
+  p, li { font-size: 15.5px; line-height: 1.65; color: var(--st-text); }
+  .muted { color: var(--st-text-muted); }
+  .muted code { font: var(--st-text-code); background: var(--st-bg-muted); border-radius: var(--st-radius-xs); padding: 1px 6px; }
+  .st-table-wrap { margin: var(--st-space-3) 0; }
+  .st-table td { font-size: 14px; line-height: 1.5; }
 </style>
 </head>
-<body>
+<body class="st-root">
 <main>
-  <h1>Privacy Policy: Strait Link</h1>
+  <picture class="logo">
+    <source srcset="assets/strait-lockup-dark.svg" media="(prefers-color-scheme: dark)">
+    <img src="assets/strait-lockup.svg" alt="Strait" width="85" height="28">
+  </picture>
+  <h1 class="st-h1">Privacy Policy: Strait Link</h1>
   <p class="muted">App: Strait Link (Android package <code>com.straitlink.app</code>) · Last updated: 3 October 2026</p>
 
   <p>Strait Link is a test app for the Strait deep-linking service. It shows how links open the
@@ -27,8 +37,8 @@
   third-party analytics or tracking SDKs. This policy explains exactly what the app and the
   Strait service process when you use it.</p>
 
-  <h2>What is collected, and why</h2>
-  <div class="wrap"><table>
+  <h2 class="st-h3">What is collected, and why</h2>
+  <div class="st-table-wrap"><table class="st-table">
     <thead><tr><th>Data</th><th>When</th><th>Why</th></tr></thead>
     <tbody>
       <tr><td>The link you opened (short link and its destination)</td><td>When a Strait link opens the app</td><td>To open the right screen and count the open</td></tr>
@@ -44,11 +54,11 @@
   photos, advertising ID or any account credentials. The "Log in" button in the app is a
   simulation; nothing is sent.</p>
 
-  <h2>Stored only on your phone</h2>
+  <h2 class="st-h3">Stored only on your phone</h2>
   <p>Checklist results, the simulated login state and the app's settings are stored on your
   device and are removed when you uninstall the app.</p>
 
-  <h2>Who processes the data</h2>
+  <h2 class="st-h3">Who processes the data</h2>
   <ul>
     <li><b>Strait</b> (the service operator) receives the data above through its link server.</li>
     <li><b>Render</b> hosts the link server, and <b>Supabase</b> hosts its database. They act as
@@ -58,23 +68,23 @@
   <p>Data is not sold, not shared with advertisers, and not used to track you across other
   apps or websites.</p>
 
-  <h2>Security and retention</h2>
+  <h2 class="st-h3">Security and retention</h2>
   <p>All traffic uses HTTPS. Device "fingerprint" codes can only be matched for 1 hour after a
   link is tapped and are never linked to your identity. Link, open and test-event records are
   kept for analytics while this test service runs, and are deleted on request.</p>
 
-  <h2>Your choices</h2>
+  <h2 class="st-h3">Your choices</h2>
   <ul>
     <li>Uninstalling the app removes everything stored on your phone.</li>
     <li>To ask for deletion of server records, or with any privacy question, contact the
     developer using the email shown on this app's Google Play listing.</li>
   </ul>
 
-  <h2>Children</h2>
+  <h2 class="st-h3">Children</h2>
   <p>The app is a developer test tool, is not directed at children, and does not knowingly
   collect data from children.</p>
 
-  <h2>Changes</h2>
+  <h2 class="st-h3">Changes</h2>
   <p>If this policy changes, the updated version will be posted on this page with a new date.</p>
 </main>
 </body>
